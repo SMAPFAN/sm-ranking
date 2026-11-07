@@ -217,8 +217,8 @@
 
                 <!-- 曲 A -->
                 <div id="card-a" onclick="handleChoice(1)" class="jacket-card glass-panel cursor-pointer p-3 rounded-2xl border border-white/10 hover:border-neonBlue flex flex-col items-center text-center space-y-2.5 group">
-                    <div class="w-full aspect-square rounded-xl overflow-hidden relative shadow-lg bg-slate-950 flex items-center justify-center border border-white/10">
-                        <svg id="song-a-svg" class="w-full h-full" viewBox="0 0 200 200"></svg>
+                    <div id="song-a-img-box" class="w-full aspect-square rounded-xl overflow-hidden relative shadow-lg bg-slate-950 flex items-center justify-center border border-white/10">
+                        <!-- JSで<img>またはSVGを挿入 -->
                     </div>
                     <div class="space-y-1 w-full">
                         <span id="song-a-release" class="inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300"></span>
@@ -229,8 +229,8 @@
 
                 <!-- 曲 B -->
                 <div id="card-b" onclick="handleChoice(-1)" class="jacket-card glass-panel cursor-pointer p-3 rounded-2xl border border-white/10 hover:border-neonPink flex flex-col items-center text-center space-y-2.5 group">
-                    <div class="w-full aspect-square rounded-xl overflow-hidden relative shadow-lg bg-slate-950 flex items-center justify-center border border-white/10">
-                        <svg id="song-b-svg" class="w-full h-full" viewBox="0 0 200 200"></svg>
+                    <div id="song-b-img-box" class="w-full aspect-square rounded-xl overflow-hidden relative shadow-lg bg-slate-950 flex items-center justify-center border border-white/10">
+                        <!-- JSで<img>またはSVGを挿入 -->
                     </div>
                     <div class="space-y-1 w-full">
                         <span id="song-b-release" class="inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300"></span>
@@ -322,71 +322,71 @@
     </div>
 
     <script>
-        // SMAP 全63曲（1st〜55th 厳密公式リリース順データベース）
+        // SMAP 全63曲（1st〜55th 厳密公式リリース順データベース + 画像ファイル対応）
         const SONGS_DATA = [
-            { id: 1, title: "Can't Stop!! -LOVING-", release: "1991", single: "1st Single", color: "#E91E63" },
-            { id: 2, title: "正義の味方はあてにならない", release: "1991", single: "2nd Single", color: "#9C27B0" },
-            { id: 3, title: "心の鏡", release: "1992", single: "3rd Single", color: "#673AB7" },
-            { id: 4, title: "負けるなBaby! 〜Never give up", release: "1992", single: "4th Single", color: "#3F51B5" },
-            { id: 5, title: "笑顔のゲンキ", release: "1992", single: "5th Single", color: "#2196F3" },
-            { id: 6, title: "雪が降ってきた", release: "1992", single: "6th Single", color: "#00BCD4" },
-            { id: 7, title: "ずっと忘れない", release: "1993", single: "7th Single", color: "#009688" },
-            { id: 8, title: "はじめての夏", release: "1993", single: "8th Single", color: "#4CAF50" },
-            { id: 9, title: "君は君だよ", release: "1993", single: "9th Single", color: "#8BC34A" },
-            { id: 10, title: "$10", release: "1993", single: "10th Single", color: "#FFEB3B" },
-            { id: 11, title: "君色思い", release: "1994", single: "11th Single", color: "#FFC107" },
-            { id: 12, title: "Hey Hey おおきに毎度あり", release: "1994", single: "12th Single", color: "#FF9800" },
-            { id: 13, title: "ORIGINAL SMILE", release: "1994", single: "13th Single", color: "#FF5722" },
-            { id: 14, title: "がんばりましょう", release: "1994", single: "14th Single", color: "#F44336" },
-            { id: 15, title: "たぶんオーライ", release: "1994", single: "15th Single", color: "#E91E63" },
-            { id: 16, title: "KANSHAして", release: "1995", single: "16th Single", color: "#9C27B0" },
-            { id: 17, title: "しようよ", release: "1995", single: "17th Single", color: "#673AB7" },
-            { id: 18, title: "どんないいこと", release: "1995", single: "18th Single", color: "#3F51B5" },
-            { id: 19, title: "俺たちに明日はある", release: "1995", single: "19th Single", color: "#2196F3" },
-            { id: 20, title: "胸さわぎを頼むよ", release: "1996", single: "20th Single", color: "#03A9F4" },
-            { id: 21, title: "はだかの王様 〜シブトク つよく〜", release: "1996", single: "21st Single", color: "#00BCD4" },
-            { id: 22, title: "青いイナズマ", release: "1996", single: "22nd Single", color: "#009688" },
-            { id: 23, title: "SHAKE", release: "1996", single: "23rd Single", color: "#4CAF50" },
-            { id: 24, title: "ダイナマイト", release: "1997", single: "24th Single", color: "#8BC34A" },
-            { id: 25, title: "セロリ", release: "1997", single: "25th Single", color: "#CDDC39" },
-            { id: 26, title: "Peace!", release: "1997", single: "26th Single", color: "#FFEB3B" },
-            { id: 27, title: "夜空ノムコウ", release: "1998", single: "27th Single", color: "#FFC107" },
-            { id: 28, title: "たいせつ", release: "1998", single: "28th Single", color: "#FF9800" },
-            { id: 29, title: "朝日を見に行こうよ", release: "1999", single: "29th Single", color: "#FF5722" },
-            { id: 30, title: "Fly", release: "1999", single: "30th Single", color: "#795548" },
-            { id: 31, title: "Let It Be", release: "2000", single: "31st Single", color: "#607D8B" },
-            { id: 32, title: "らいおんハート", release: "2000", single: "32nd Single", color: "#E91E63" },
-            { id: 33, title: "Smac", release: "2001", single: "33rd Single", color: "#9C27B0" },
-            { id: 34, title: "freebird", release: "2002", single: "34th Single", color: "#2196F3" , image: "IMG_sekai.jpeg" },
-            { id: 35, title: "世界に一つだけの花", release: "2003", single: "35th Single", color: "#4CAF50" },
-            { id: 36, title: "友だちへ 〜Say What You Will〜", release: "2005", single: "36th Single", color: "#8BC34A" },
-            { id: 37, title: "BANG! BANG! バカンス!", release: "2005", single: "37th Single", color: "#FF5722" },
-            { id: 38, title: "Triangle", release: "2005", single: "38th Single", color: "#3F51B5" },
-            { id: 39, title: "Dear WOMAN", release: "2006", single: "39th Single", color: "#E91E63" },
-            { id: 40, title: "ありがとう", release: "2006", single: "40th Single", color: "#FFC107" },
-            { id: 41, title: "弾丸ファイター", release: "2007", single: "41st Single", color: "#F44336" },
-            { id: 42, title: "そのまま", release: "2008", single: "42nd (両A面)", color: "#9C27B0" },
-            { id: 43, title: "White Message", release: "2008", single: "42nd (両A面)", color: "#00BCD4" },
-            { id: 44, title: "この瞬間、きっと夢じゃない", release: "2008", single: "43rd Single", color: "#2196F3" },
-            { id: 45, title: "そっと きゅっと", release: "2009", single: "44th (両A面)", color: "#607D8B" },
-            { id: 46, title: "スーパースター★", release: "2009", single: "44th (両A面)", color: "#FFEB3B" },
-            { id: 47, title: "This is love", release: "2010", single: "45th Single", color: "#E91E63" },
-            { id: 48, title: "僕の半分", release: "2011", single: "46th Single", color: "#3F51B5" },
-            { id: 49, title: "さかさまの空", release: "2012", single: "47th Single", color: "#03A9F4" },
-            { id: 50, title: "Moment", release: "2012", single: "48th Single", color: "#FF9800" },
-            { id: 51, title: "Mistake!", release: "2013", single: "49th (両A面)", color: "#F44336" },
-            { id: 52, title: "Battery", release: "2013", single: "49th (両A面)", color: "#00F0FF" },
-            { id: 53, title: "Joy!!", release: "2013", single: "50th Single", color: "#FFEB3B" },
-            { id: 54, title: "シャレオツ", release: "2013", single: "51st (両A面)", color: "#9C27B0" },
-            { id: 55, title: "ハロー", release: "2013", single: "51st (両A面)", color: "#FF007F" },
-            { id: 56, title: "Yes we are", release: "2014", single: "52nd (両A面)", color: "#2196F3" },
-            { id: 57, title: "ココカラ", release: "2014", single: "52nd (両A面)", color: "#4CAF50" },
-            { id: 58, title: "Top Of The World", release: "2014", single: "53rd (両A面)", color: "#FFC107" },
-            { id: 59, title: "Amazing Discovery", release: "2014", single: "53rd (両A面)", color: "#00BCD4" },
-            { id: 60, title: "華麗なる逆襲", release: "2015", single: "54th (両A面)", color: "#FFD700" },
-            { id: 61, title: "ユーモアしちゃうよ", release: "2015", single: "54th (両A面)", color: "#FF5722" },
-            { id: 62, title: "Otherside", release: "2015", single: "55th (両A面)", color: "#673AB7" },
-            { id: 63, title: "愛が止まるまでは", release: "2015", single: "55th (両A面)", color: "#E91E63" }
+            { id: 1, title: "Can't Stop!! -LOVING-", release: "1991", single: "1st Single", color: "#E91E63", image: "IMG_cant_stop.jpeg" },
+            { id: 2, title: "正義の味方はあてにならない", release: "1991", single: "2nd Single", color: "#9C27B0", image: "" },
+            { id: 3, title: "心の鏡", release: "1992", single: "3rd Single", color: "#673AB7", image: "" },
+            { id: 4, title: "負けるなBaby! 〜Never give up", release: "1992", single: "4th Single", color: "#3F51B5", image: "" },
+            { id: 5, title: "笑顔のゲンキ", release: "1992", single: "5th Single", color: "#2196F3", image: "" },
+            { id: 6, title: "雪が降ってきた", release: "1992", single: "6th Single", color: "#00BCD4", image: "" },
+            { id: 7, title: "ずっと忘れない", release: "1993", single: "7th Single", color: "#009688", image: "" },
+            { id: 8, title: "はじめての夏", release: "1993", single: "8th Single", color: "#4CAF50", image: "" },
+            { id: 9, title: "君は君だよ", release: "1993", single: "9th Single", color: "#8BC34A", image: "" },
+            { id: 10, title: "$10", release: "1993", single: "10th Single", color: "#FFEB3B", image: "" },
+            { id: 11, title: "君色思い", release: "1994", single: "11th Single", color: "#FFC107", image: "" },
+            { id: 12, title: "Hey Hey おおきに毎度あり", release: "1994", single: "12th Single", color: "#FF9800", image: "" },
+            { id: 13, title: "ORIGINAL SMILE", release: "1994", single: "13th Single", color: "#FF5722", image: "" },
+            { id: 14, title: "がんばりましょう", release: "1994", single: "14th Single", color: "#F44336", image: "" },
+            { id: 15, title: "たぶんオーライ", release: "1994", single: "15th Single", color: "#E91E63", image: "" },
+            { id: 16, title: "KANSHAして", release: "1995", single: "16th Single", color: "#9C27B0", image: "" },
+            { id: 17, title: "しようよ", release: "1995", single: "17th Single", color: "#673AB7", image: "" },
+            { id: 18, title: "どんないいこと", release: "1995", single: "18th Single", color: "#3F51B5", image: "" },
+            { id: 19, title: "俺たちに明日はある", release: "1995", single: "19th Single", color: "#2196F3", image: "" },
+            { id: 20, title: "胸さわぎを頼むよ", release: "1996", single: "20th Single", color: "#03A9F4", image: "" },
+            { id: 21, title: "はだかの王様 〜シブトク つよく〜", release: "1996", single: "21st Single", color: "#00BCD4", image: "" },
+            { id: 22, title: "青いイナズマ", release: "1996", single: "22nd Single", color: "#009688", image: "" },
+            { id: 23, title: "SHAKE", release: "1996", single: "23rd Single", color: "#4CAF50", image: "" },
+            { id: 24, title: "ダイナマイト", release: "1997", single: "24th Single", color: "#8BC34A", image: "" },
+            { id: 25, title: "セロリ", release: "1997", single: "25th Single", color: "#CDDC39", image: "" },
+            { id: 26, title: "Peace!", release: "1997", single: "26th Single", color: "#FFEB3B", image: "" },
+            { id: 27, title: "夜空ノムコウ", release: "1998", single: "27th Single", color: "#FFC107", image: "" },
+            { id: 28, title: "たいせつ", release: "1998", single: "28th Single", color: "#FF9800", image: "" },
+            { id: 29, title: "朝日を見に行こうよ", release: "1999", single: "29th Single", color: "#FF5722", image: "" },
+            { id: 30, title: "Fly", release: "1999", single: "30th Single", color: "#795548", image: "" },
+            { id: 31, title: "Let It Be", release: "2000", single: "31st Single", color: "#607D8B", image: "" },
+            { id: 32, title: "らいおんハート", release: "2000", single: "32nd Single", color: "#E91E63", image: "" },
+            { id: 33, title: "Smac", release: "2001", single: "33rd Single", color: "#9C27B0", image: "" },
+            { id: 34, title: "freebird", release: "2002", single: "34th Single", color: "#2196F3", image: "" },
+            { id: 35, title: "世界に一つだけの花", release: "2003", single: "35th Single", color: "#4CAF50", image: "IMG_sekai.jpeg" },
+            { id: 36, title: "友だちへ 〜Say What You Will〜", release: "2005", single: "36th Single", color: "#8BC34A", image: "" },
+            { id: 37, title: "BANG! BANG! バカンス!", release: "2005", single: "37th Single", color: "#FF5722", image: "" },
+            { id: 38, title: "Triangle", release: "2005", single: "38th Single", color: "#3F51B5", image: "" },
+            { id: 39, title: "Dear WOMAN", release: "2006", single: "39th Single", color: "#E91E63", image: "" },
+            { id: 40, title: "ありがとう", release: "2006", single: "40th Single", color: "#FFC107", image: "" },
+            { id: 41, title: "弾丸ファイター", release: "2007", single: "41st Single", color: "#F44336", image: "" },
+            { id: 42, title: "そのまま", release: "2008", single: "42nd (両A面)", color: "#9C27B0", image: "" },
+            { id: 43, title: "White Message", release: "2008", single: "42nd (両A面)", color: "#00BCD4", image: "" },
+            { id: 44, title: "この瞬間、きっと夢じゃない", release: "2008", single: "43rd Single", color: "#2196F3", image: "" },
+            { id: 45, title: "そっと きゅっと", release: "2009", single: "44th (両A面)", color: "#607D8B", image: "" },
+            { id: 46, title: "スーパースター★", release: "2009", single: "44th (両A面)", color: "#FFEB3B", image: "" },
+            { id: 47, title: "This is love", release: "2010", single: "45th Single", color: "#E91E63", image: "" },
+            { id: 48, title: "僕の半分", release: "2011", single: "46th Single", color: "#3F51B5", image: "" },
+            { id: 49, title: "さかさまの空", release: "2012", single: "47th Single", color: "#03A9F4", image: "" },
+            { id: 50, title: "Moment", release: "2012", single: "48th Single", color: "#FF9800", image: "" },
+            { id: 51, title: "Mistake!", release: "2013", single: "49th (両A面)", color: "#F44336", image: "" },
+            { id: 52, title: "Battery", release: "2013", single: "49th (両A面)", color: "#00F0FF", image: "" },
+            { id: 53, title: "Joy!!", release: "2013", single: "50th Single", color: "#FFEB3B", image: "" },
+            { id: 54, title: "シャレオツ", release: "2013", single: "51st (両A面)", color: "#9C27B0", image: "" },
+            { id: 55, title: "ハロー", release: "2013", single: "51st (両A面)", color: "#FF007F", image: "" },
+            { id: 56, title: "Yes we are", release: "2014", single: "52nd (両A面)", color: "#2196F3", image: "" },
+            { id: 57, title: "ココカラ", release: "2014", single: "52nd (両A面)", color: "#4CAF50", image: "" },
+            { id: 58, title: "Top Of The World", release: "2014", single: "53rd (両A面)", color: "#FFC107", image: "" },
+            { id: 59, title: "Amazing Discovery", release: "2014", single: "53rd (両A面)", color: "#00BCD4", image: "" },
+            { id: 60, title: "華麗なる逆襲", release: "2015", single: "54th (両A面)", color: "#FFD700", image: "" },
+            { id: 61, title: "ユーモアしちゃうよ", release: "2015", single: "54th (両A面)", color: "#FF5722", image: "" },
+            { id: 62, title: "Otherside", release: "2015", single: "55th (両A面)", color: "#673AB7", image: "" },
+            { id: 63, title: "愛が止まるまでは", release: "2015", single: "55th (両A面)", color: "#E91E63", image: "" }
         ];
 
         // 状態管理
@@ -419,6 +419,15 @@
         const gridContainer = document.getElementById('grid-container');
         const btnGridSubmit = document.getElementById('btn-grid-submit');
         const gridSubmitText = document.getElementById('grid-submit-text');
+
+        // ジャケット描画ヘルパー（画像ファイル優先、無ければSVGフォールバック）
+        function getJacketHTML(song) {
+            if (song.image && song.image.trim() !== "") {
+                return `<img src="${song.image}" alt="${song.title}" class="w-full h-full object-cover rounded-lg" loading="lazy">`;
+            } else {
+                return `<svg class="w-full h-full" viewBox="0 0 200 200">${createJacketSVG(song)}</svg>`;
+            }
+        }
 
         // SVG CDジャケット作成
         function createJacketSVG(song) {
@@ -500,7 +509,7 @@
                 card.className = "jacket-card glass-panel cursor-pointer p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center text-center space-y-1 group relative overflow-hidden";
                 card.innerHTML = `
                     <div class="w-full aspect-square rounded-lg overflow-hidden relative bg-slate-950 flex items-center justify-center border border-white/10">
-                        <svg class="w-full h-full" viewBox="0 0 200 200">${createJacketSVG(song)}</svg>
+                        ${getJacketHTML(song)}
                         <div class="check-mark absolute inset-0 bg-gold/30 backdrop-blur-[2px] hidden flex items-center justify-center text-gold text-lg sm:text-2xl font-black">
                             <i class="fa-solid fa-circle-check drop-shadow-md"></i>
                         </div>
@@ -612,12 +621,12 @@
             document.getElementById('song-a-title').innerText = targetSong.title;
             document.getElementById('song-a-release').innerText = `${targetSong.release}年`;
             document.getElementById('song-a-detail').innerText = targetSong.single;
-            document.getElementById('song-a-svg').innerHTML = createJacketSVG(targetSong);
+            document.getElementById('song-a-img-box').innerHTML = getJacketHTML(targetSong);
 
             document.getElementById('song-b-title').innerText = compareSong.title;
             document.getElementById('song-b-release').innerText = `${compareSong.release}年`;
             document.getElementById('song-b-detail').innerText = compareSong.single;
-            document.getElementById('song-b-svg').innerHTML = createJacketSVG(compareSong);
+            document.getElementById('song-b-img-box').innerHTML = getJacketHTML(compareSong);
 
             comparisonCount++;
             document.getElementById('battle-count').innerHTML = `<i class="fa-solid fa-gamepad mr-1"></i> 本戦 BATTLE #${comparisonCount}`;
@@ -673,6 +682,9 @@
                 item.innerHTML = `
                     <div class="flex items-center gap-2.5 truncate">
                         <span class="w-4 text-center font-mono font-bold ${idx < 3 ? 'text-gold' : 'text-slate-400'}">${idx + 1}</span>
+                        <div class="w-6 h-6 rounded overflow-hidden shrink-0 bg-slate-950 flex items-center justify-center border border-white/10">
+                            ${getJacketHTML(song)}
+                        </div>
                         <span class="font-bold text-white truncate">${song.title}</span>
                     </div>
                     <span class="text-[10px] text-slate-400 shrink-0">${song.release}年</span>
@@ -697,8 +709,8 @@
                 row.className = "p-2 rounded-xl glass-panel border border-white/10 flex items-center justify-between gap-2.5";
                 row.innerHTML = `
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center font-mono text-[10px] text-gold font-bold shrink-0">
-                            ${song.id}
+                        <div class="w-7 h-7 rounded-lg overflow-hidden shrink-0 bg-slate-950 border border-white/10 flex items-center justify-center">
+                            ${getJacketHTML(song)}
                         </div>
                         <div class="truncate">
                             <h5 class="font-bold text-white text-xs truncate">${song.title}</h5>
@@ -742,6 +754,9 @@
                     <div class="flex items-center gap-2.5 min-w-0">
                         <div class="w-7 h-7 rounded-lg ${badgeStyle} flex items-center justify-center font-display text-xs shrink-0">
                             ${icon}${rank}
+                        </div>
+                        <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-slate-950 border border-white/10 flex items-center justify-center">
+                            ${getJacketHTML(song)}
                         </div>
                         <div class="truncate">
                             <h4 class="font-bold text-white text-xs sm:text-sm truncate">${song.title}</h4>
