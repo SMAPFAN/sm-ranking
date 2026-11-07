@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMAP Single Song Sorter - 全63曲決定版 3x3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Zen Kaku Gothic New"', '"Outfit"', 'sans-serif'],
+                        display: ['"Outfit"', '"Zen Kaku Gothic New"', 'sans-serif'],
+                    },
+                    colors: {
+                        gold: '#FFD700',
+                        neonPink: '#FF007F',
+                        neonBlue: '#00F0FF',
+                        darkBg: '#090710',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #090710;
+            color: #FFFFFF;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 0, 127, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(120, 0, 255, 0.08) 0%, transparent 60%);
+            background-attachment: fixed;
+        }
+
+        .glass-panel {
+            background: rgba(21, 16, 38, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .jacket-card {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .jacket-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            border-color: rgba(0, 240, 255, 0.6);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 240, 255, 0.2);
+        }
+
+        .jacket-card.selected {
+            border-color: #FFD700 !important;
+            background: rgba(255, 215, 0, 0.18) !important;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            transform: scale(0.97);
+        }
+
+        /* 3x3 の完全固定レイアウト */
+        .grid-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .grid-3x3 {
+                gap: 0.875rem;
+            }
+        }
+
+        /* 2x2 の固定レイアウト */
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+            max-width: 28rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-weight: 900; }
+        .rank-2 { background: linear-gradient(135deg, #E2E8F0, #94A3B8); color: #000; font-weight: 900; }
+        .rank-3 { background: linear-gradient(135deg, #F59E0B, #B45309); color: #FFF; font-weight: 900; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-full flex flex-col font-sans antialiased text-slate-100 selection:bg-neonPink selection:text-white">
+
+    <!-- ヘッダー -->
+    <header class="w-full py-3 px-4 border-b border-white/10 glass-panel sticky top-0 z-40 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-neonPink via-purple-600 to-neonBlue flex items-center justify-center shadow-lg font-black text-white text-lg font-display">
+                S
+            </div>
+            <div>
+                <h1 class="font-display font-black text-sm sm:text-base tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-gold leading-tight">
+                    SMAP <span class="text-gold">SINGLE SORTER</span>
+                </h1>
+                <p class="text-[10px] text-slate-400">全63曲公式リリース順 3段階ソート</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-header-reset" onclick="resetSorter()" class="hidden text-xs px-2.5 py-1.5 rounded-lg border border-white/20 hover:bg-white/10 text-slate-300 transition-colors flex items-center gap-1">
+                <i class="fa-solid fa-rotate-left"></i> <span class="hidden sm:inline">最初から</span>
+            </button>
+            <button onclick="openSongListModal()" class="text-xs px-3 py-1.5 rounded-lg border border-gold/40 bg-gold/10 hover:bg-gold/20 text-gold font-bold transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-list"></i> 全63曲
+            </button>
+        </div>
+    </header>
+
+    <!-- メイン領域 -->
+    <main class="flex-1 max-w-3xl w-full mx-auto p-3 sm:p-5 flex flex-col justify-center">
+
+        <!-- 1. スタート画面 -->
+        <section id="screen-start" class="space-y-6 py-6 text-center">
+            <div class="space-y-3">
+                <div class="inline-block px-4 py-1 rounded-full glass-panel text-gold text-xs font-semibold tracking-wider border border-gold/40 uppercase">
+                    <i class="fa-solid fa-star mr-1"></i> Full 63 Singles Selection
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+                    SMAP全63曲から<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue via-purple-400 to-gold">
+                        マイベストTOP10を作成
+                    </span>
+                </h2>
+                <p class="text-slate-400 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
+                    1st「Can't Stop!! -LOVING-」から55th「愛が止まるまでは」までの全シングルA面・両A面63曲を厳密なリリース順で完全網羅！
+                </p>
+            </div>
+
+            <!-- ステージ進行解説 -->
+            <div class="grid grid-cols-3 gap-2 max-w-lg mx-auto text-left">
+                <div class="glass-panel p-3 rounded-xl border border-white/10 text-center space-y-1">
+                    <span class="text-[10px] font-bold text-neonBlue bg-neonBlue/10 px-2 py-0.5 rounded border border-neonBlue/30">STAGE 1</span>
+                    <h4 class="text-xs font-bold text-white">第1予選 9択</h4>
+                    <p class="text-[10px] text-slate-400">3×3画面で4曲選択</p>
+                </div>
+                <div class="glass-panel p-3 rounded-xl border border-white/10 text-center space-y-1">
+                    <span class="text-[10px] font-bold text-neonPink bg-neonPink/10 px-2 py-0.5 rounded border border-neonPink/30">STAGE 2</span>
+                    <h4 class="text-xs font-bold text-white">第2予選 4択</h4>
+                    <p class="text-[10px] text-slate-400">2×2画面で2曲選択</p>
+                </div>
+                <div class="glass-panel p-3 rounded-xl border border-white/10 text-center space-y-1">
+                    <span class="text-[10px] font-bold text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/30">FINAL</span>
+                    <h4 class="text-xs font-bold text-white">本戦 2択</h4>
+                    <p class="text-[10px] text-slate-400">精鋭14曲の直接対決</p>
+                </div>
+            </div>
+
+            <div class="max-w-md mx-auto space-y-3 pt-2">
+                <button onclick="startStage1()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-neonBlue via-purple-600 to-neonPink hover:opacity-95 transition-all shadow-xl text-center space-y-1">
+                    <div class="text-base font-black text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> ランキング作成スタート
+                    </div>
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. グリッド予選画面（第1予選:3x3 9択 / 第2予選:2x2 4択） -->
+        <section id="screen-grid-stage" class="hidden space-y-4">
+            <!-- 進捗ステータス -->
+            <div class="glass-panel p-3 sm:p-4 rounded-xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <span id="grid-stage-badge" class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-neonBlue/20 text-neonBlue border border-neonBlue/40">
+                        第1予選 (3×3 9択)
+                    </span>
+                    <h3 id="grid-stage-title" class="text-sm sm:text-base font-black text-white mt-1">
+                        グループ 1 / 7
+                    </h3>
+                </div>
+                <button id="btn-grid-submit" onclick="submitGridSelection()" disabled class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-neonBlue to-purple-600 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs text-white shadow-lg transition-all flex items-center justify-center gap-2">
+                    <span id="grid-submit-text">選んだ曲で確定する (0/4)</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- ジャケット選択グリッド -->
+            <div id="grid-container">
+                <!-- JSで3x3または2x2を挿入 -->
+            </div>
+        </section>
+
+        <!-- 3. 本戦 2択画面 -->
+        <section id="screen-sorter" class="hidden space-y-4 my-auto py-2">
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs text-slate-400">
+                    <span id="battle-count" class="font-mono text-neonBlue font-semibold"><i class="fa-solid fa-gamepad mr-1"></i> 本戦 BATTLE #1</span>
+                    <button onclick="openInterimRanking()" class="text-gold hover:underline flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-list-ol"></i> 暫定順位
+                    </button>
+                    <span id="progress-text" class="font-mono font-bold text-white">0%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-white/10">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-neonBlue via-purple-500 to-neonPink rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 2択対決カード -->
+            <div class="grid grid-cols-2 gap-3 sm:gap-6 relative">
+                <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-950 border-2 border-gold flex items-center justify-center shadow-xl">
+                    <span class="font-display font-black text-xs italic text-gold">VS</span>
+                </div>
+
+                <!-- 曲 A -->
+                <div id="card-a" onclick="handleChoice(1)" class="jacket-card glass-panel cursor-pointer p-3 rounded-2xl border border-white/10 hover:border-neonBlue flex flex-col items-center text-center space-y-2.5 group">
+                    <div class="w-full aspect-square rounded-xl overflow-hidden relative shadow-lg bg-slate-950 flex items-center justify-center border border-white/10">
+                        <svg id="song-a-svg" class="w-full h-full" viewBox="0 0 200 200"></svg>
+                    </div>
+                    <div class="space-y-1 w-full">
+                        <span id="song-a-release" class="inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300"></span>
+                        <h3 id="song-a-title" class="text-xs sm:text-sm font-black text-white group-hover:text-neonBlue transition-colors leading-tight line-clamp-2 min-h-[2.2rem] flex items-center justify-center"></h3>
+                        <p id="song-a-detail" class="text-[10px] text-slate-400 truncate"></p>
+                    </div>
+                </div>
+
+                <!-- 曲 B -->
+                <div id="card-b" onclick="handleChoice(-1)" class="jacket-card glass-panel cursor-pointer p-3 rounded-2xl border border-white/10 hover:border-neonPink flex flex-col items-center text-center space-y-2.5 group">
+                    <div class="w-full aspect-square rounded-xl overflow-hidden relative shadow-lg bg-slate-950 flex items-center justify-center border border-white/10">
+                        <svg id="song-b-svg" class="w-full h-full" viewBox="0 0 200 200"></svg>
+                    </div>
+                    <div class="space-y-1 w-full">
+                        <span id="song-b-release" class="inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300"></span>
+                        <h3 id="song-b-title" class="text-xs sm:text-sm font-black text-white group-hover:text-neonPink transition-colors leading-tight line-clamp-2 min-h-[2.2rem] flex items-center justify-center"></h3>
+                        <p id="song-b-detail" class="text-[10px] text-slate-400 truncate"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作補助ボタン -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+                <button id="btn-undo" onclick="undoChoice()" disabled class="py-2.5 px-3 rounded-xl glass-panel disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/10 text-xs font-semibold text-slate-300 transition-all border border-white/10 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> ひとつ戻る
+                </button>
+                <button onclick="handleChoice(0)" class="py-2.5 px-3 rounded-xl glass-panel hover:bg-white/10 text-xs font-semibold text-slate-300 transition-all border border-white/10 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-scale-balanced text-gold"></i> 選べない / 同等
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. 結果表示画面 -->
+        <section id="screen-result" class="hidden space-y-5 py-4">
+            <div class="text-center space-y-1.5">
+                <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-gold/10 border border-gold/40 text-gold text-xs font-bold">
+                    <i class="fa-solid fa-trophy"></i> RANKING COMPLETE
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black text-white">SMAPシングル<br><span class="text-gold">マイベスト TOP10</span></h2>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <button onclick="copyResultText(10)" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-neonBlue to-purple-600 font-bold text-xs sm:text-sm shadow-lg hover:opacity-90 transition-all flex items-center gap-2 text-white">
+                    <i class="fa-regular fa-copy"></i> TOP10をコピー
+                </button>
+                <button onclick="resetSorter()" class="px-4 py-2.5 rounded-xl glass-panel border border-white/20 hover:bg-white/10 text-xs sm:text-sm font-semibold text-slate-300 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate"></i> 最初からもう一度
+                </button>
+            </div>
+
+            <div id="result-list" class="space-y-2 max-w-md mx-auto pt-2"></div>
+        </section>
+
+    </main>
+
+    <!-- モーダル: 暫定ランキング -->
+    <div id="modal-interim" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md max-h-[85vh] rounded-2xl border border-white/20 flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <div class="flex items-center gap-2 text-gold font-bold text-xs sm:text-sm">
+                    <i class="fa-solid fa-chart-simple"></i> 本戦 暫定ランキング
+                </div>
+                <button onclick="closeInterimRanking()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="interim-list" class="p-3 overflow-y-auto space-y-1.5 flex-1"></div>
+            <div class="p-3 border-t border-white/10 text-center bg-white/5">
+                <button onclick="closeInterimRanking()" class="w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white">
+                    対戦に戻る
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- モーダル: 全63曲一覧確認 -->
+    <div id="modal-song-list" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg max-h-[85vh] rounded-2xl border border-gold/30 flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <div class="flex items-center gap-2 text-gold font-bold text-xs sm:text-sm">
+                    <i class="fa-solid fa-compact-disc"></i> SMAP シングル全63曲（公式リリース順）
+                </div>
+                <button onclick="closeSongListModal()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="all-song-list-container" class="p-3 overflow-y-auto space-y-1.5 flex-1">
+                <!-- JSで全曲挿入 -->
+            </div>
+            <div class="p-3 border-t border-white/10 text-center bg-white/5">
+                <button onclick="closeSongListModal()" class="w-full py-2 rounded-xl bg-gold/20 border border-gold/40 hover:bg-gold/30 text-xs font-bold text-gold">
+                    閉じる
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-xl glass-panel border border-gold text-gold text-xs font-bold shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-text"></span>
+    </div>
+
+    <script>
+        // SMAP 全63曲（1st〜55th 厳密公式リリース順データベース）
+        const SONGS_DATA = [
+            { id: 1, title: "Can't Stop!! -LOVING-", release: "1991", single: "1st Single", color: "#E91E63" },
+            { id: 2, title: "正義の味方はあてにならない", release: "1991", single: "2nd Single", color: "#9C27B0" },
+            { id: 3, title: "心の鏡", release: "1992", single: "3rd Single", color: "#673AB7" },
+            { id: 4, title: "負けるなBaby! 〜Never give up", release: "1992", single: "4th Single", color: "#3F51B5" },
+            { id: 5, title: "笑顔のゲンキ", release: "1992", single: "5th Single", color: "#2196F3" },
+            { id: 6, title: "雪が降ってきた", release: "1992", single: "6th Single", color: "#00BCD4" },
+            { id: 7, title: "ずっと忘れない", release: "1993", single: "7th Single", color: "#009688" },
+            { id: 8, title: "はじめての夏", release: "1993", single: "8th Single", color: "#4CAF50" },
+            { id: 9, title: "君は君だよ", release: "1993", single: "9th Single", color: "#8BC34A" },
+            { id: 10, title: "$10", release: "1993", single: "10th Single", color: "#FFEB3B" },
+            { id: 11, title: "君色思い", release: "1994", single: "11th Single", color: "#FFC107" },
+            { id: 12, title: "Hey Hey おおきに毎度あり", release: "1994", single: "12th Single", color: "#FF9800" },
+            { id: 13, title: "ORIGINAL SMILE", release: "1994", single: "13th Single", color: "#FF5722" },
+            { id: 14, title: "がんばりましょう", release: "1994", single: "14th Single", color: "#F44336" },
+            { id: 15, title: "たぶんオーライ", release: "1994", single: "15th Single", color: "#E91E63" },
+            { id: 16, title: "KANSHAして", release: "1995", single: "16th Single", color: "#9C27B0" },
+            { id: 17, title: "しようよ", release: "1995", single: "17th Single", color: "#673AB7" },
+            { id: 18, title: "どんないいこと", release: "1995", single: "18th Single", color: "#3F51B5" },
+            { id: 19, title: "俺たちに明日はある", release: "1995", single: "19th Single", color: "#2196F3" },
+            { id: 20, title: "胸さわぎを頼むよ", release: "1996", single: "20th Single", color: "#03A9F4" },
+            { id: 21, title: "はだかの王様 〜シブトク つよく〜", release: "1996", single: "21st Single", color: "#00BCD4" },
+            { id: 22, title: "青いイナズマ", release: "1996", single: "22nd Single", color: "#009688" },
+            { id: 23, title: "SHAKE", release: "1996", single: "23rd Single", color: "#4CAF50" },
+            { id: 24, title: "ダイナマイト", release: "1997", single: "24th Single", color: "#8BC34A" },
+            { id: 25, title: "セロリ", release: "1997", single: "25th Single", color: "#CDDC39" },
+            { id: 26, title: "Peace!", release: "1997", single: "26th Single", color: "#FFEB3B" },
+            { id: 27, title: "夜空ノムコウ", release: "1998", single: "27th Single", color: "#FFC107" },
+            { id: 28, title: "たいせつ", release: "1998", single: "28th Single", color: "#FF9800" },
+            { id: 29, title: "朝日を見に行こうよ", release: "1999", single: "29th Single", color: "#FF5722" },
+            { id: 30, title: "Fly", release: "1999", single: "30th Single", color: "#795548" },
+            { id: 31, title: "Let It Be", release: "2000", single: "31st Single", color: "#607D8B" },
+            { id: 32, title: "らいおんハート", release: "2000", single: "32nd Single", color: "#E91E63" },
+            { id: 33, title: "Smac", release: "2001", single: "33rd Single", color: "#9C27B0" },
+            { id: 34, title: "freebird", release: "2002", single: "34th Single", color: "#2196F3" },
+            { id: 35, title: "世界に一つだけの花", release: "2003", single: "35th Single", color: "#4CAF50" },
+            { id: 36, title: "友だちへ 〜Say What You Will〜", release: "2005", single: "36th Single", color: "#8BC34A" },
+            { id: 37, title: "BANG! BANG! バカンス!", release: "2005", single: "37th Single", color: "#FF5722" },
+            { id: 38, title: "Triangle", release: "2005", single: "38th Single", color: "#3F51B5" },
+            { id: 39, title: "Dear WOMAN", release: "2006", single: "39th Single", color: "#E91E63" },
+            { id: 40, title: "ありがとう", release: "2006", single: "40th Single", color: "#FFC107" },
+            { id: 41, title: "弾丸ファイター", release: "2007", single: "41st Single", color: "#F44336" },
+            { id: 42, title: "そのまま", release: "2008", single: "42nd (両A面)", color: "#9C27B0" },
+            { id: 43, title: "White Message", release: "2008", single: "42nd (両A面)", color: "#00BCD4" },
+            { id: 44, title: "この瞬間、きっと夢じゃない", release: "2008", single: "43rd Single", color: "#2196F3" },
+            { id: 45, title: "そっと きゅっと", release: "2009", single: "44th (両A面)", color: "#607D8B" },
+            { id: 46, title: "スーパースター★", release: "2009", single: "44th (両A面)", color: "#FFEB3B" },
+            { id: 47, title: "This is love", release: "2010", single: "45th Single", color: "#E91E63" },
+            { id: 48, title: "僕の半分", release: "2011", single: "46th Single", color: "#3F51B5" },
+            { id: 49, title: "さかさまの空", release: "2012", single: "47th Single", color: "#03A9F4" },
+            { id: 50, title: "Moment", release: "2012", single: "48th Single", color: "#FF9800" },
+            { id: 51, title: "Mistake!", release: "2013", single: "49th (両A面)", color: "#F44336" },
+            { id: 52, title: "Battery", release: "2013", single: "49th (両A面)", color: "#00F0FF" },
+            { id: 53, title: "Joy!!", release: "2013", single: "50th Single", color: "#FFEB3B" },
+            { id: 54, title: "シャレオツ", release: "2013", single: "51st (両A面)", color: "#9C27B0" },
+            { id: 55, title: "ハロー", release: "2013", single: "51st (両A面)", color: "#FF007F" },
+            { id: 56, title: "Yes we are", release: "2014", single: "52nd (両A面)", color: "#2196F3" },
+            { id: 57, title: "ココカラ", release: "2014", single: "52nd (両A面)", color: "#4CAF50" },
+            { id: 58, title: "Top Of The World", release: "2014", single: "53rd (両A面)", color: "#FFC107" },
+            { id: 59, title: "Amazing Discovery", release: "2014", single: "53rd (両A面)", color: "#00BCD4" },
+            { id: 60, title: "華麗なる逆襲", release: "2015", single: "54th (両A面)", color: "#FFD700" },
+            { id: 61, title: "ユーモアしちゃうよ", release: "2015", single: "54th (両A面)", color: "#FF5722" },
+            { id: 62, title: "Otherside", release: "2015", single: "55th (両A面)", color: "#673AB7" },
+            { id: 63, title: "愛が止まるまでは", release: "2015", single: "55th (両A面)", color: "#E91E63" }
+        ];
+
+        // 状態管理
+        let stage = 0;
+        let stage1Groups = [];
+        let stage1Passed = [];
+        let currentGroupIdx = 0;
+        let selectedInGroup = [];
+
+        let stage2Groups = [];
+        let final14Songs = [];
+
+        // 本戦（二分挿入ソート）
+        let unsortedItems = [];
+        let sortedArray = [];
+        let currentItemIndex = 0;
+        let low = 0, high = 0, mid = 0;
+        let comparisonCount = 0;
+        let historyStack = [];
+
+        // DOM参照
+        const screenStart = document.getElementById('screen-start');
+        const screenGridStage = document.getElementById('screen-grid-stage');
+        const screenSorter = document.getElementById('screen-sorter');
+        const screenResult = document.getElementById('screen-result');
+        const btnHeaderReset = document.getElementById('btn-header-reset');
+
+        const gridStageBadge = document.getElementById('grid-stage-badge');
+        const gridStageTitle = document.getElementById('grid-stage-title');
+        const gridContainer = document.getElementById('grid-container');
+        const btnGridSubmit = document.getElementById('btn-grid-submit');
+        const gridSubmitText = document.getElementById('grid-submit-text');
+
+        // SVG CDジャケット作成
+        function createJacketSVG(song) {
+            const numMatch = song.single.match(/\d+/);
+            const singleNum = numMatch ? numMatch[0] : "S";
+            return `
+                <defs>
+                    <linearGradient id="grad-${song.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="${song.color}" stop-opacity="0.9" />
+                        <stop offset="100%" stop-color="#090710" stop-opacity="0.95" />
+                    </linearGradient>
+                </defs>
+                <rect width="200" height="200" fill="url(#grad-${song.id})" />
+                <circle cx="100" cy="100" r="65" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none" />
+                <circle cx="100" cy="100" r="40" stroke="rgba(255,255,255,0.1)" stroke-width="1" fill="none" />
+                <circle cx="100" cy="100" r="16" fill="#090710" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+                <text x="100" y="52" font-family="'Outfit', sans-serif" font-weight="900" font-size="24" fill="#FFFFFF" text-anchor="middle">SMAP</text>
+                <text x="100" y="70" font-family="'Outfit', sans-serif" font-weight="700" font-size="10" fill="#FFD700" text-anchor="middle" letter-spacing="1">SINGLE #${singleNum}</text>
+                <text x="100" y="158" font-family="'Zen Kaku Gothic New', sans-serif" font-weight="700" font-size="11" fill="#FFFFFF" text-anchor="middle" opacity="0.8">${song.release}</text>
+            `;
+        }
+
+        // 配列シャッフル
+        function shuffle(arr) {
+            const res = [...arr];
+            for (let i = res.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [res[i], res[j]] = [res[j], res[i]];
+            }
+            return res;
+        }
+
+        // ================= 第1予選（3x3 9択） =================
+        function startStage1() {
+            stage = 1;
+            const shuffled = shuffle(SONGS_DATA); // 全63曲
+            stage1Groups = [];
+            for (let i = 0; i < 7; i++) {
+                stage1Groups.push(shuffled.slice(i * 9, (i + 1) * 9));
+            }
+            stage1Passed = [];
+            currentGroupIdx = 0;
+
+            screenStart.classList.add('hidden');
+            screenSorter.classList.add('hidden');
+            screenResult.classList.add('hidden');
+            screenGridStage.classList.remove('hidden');
+            btnHeaderReset.classList.remove('hidden');
+
+            renderGridGroup();
+        }
+
+        function renderGridGroup() {
+            selectedInGroup = [];
+            const targetSelectCount = (stage === 1) ? 4 : 2;
+            const currentGroup = (stage === 1) ? stage1Groups[currentGroupIdx] : stage2Groups[currentGroupIdx];
+
+            gridContainer.innerHTML = '';
+
+            if (stage === 1) {
+                // 3x3 グリッドコンテナ作成
+                gridContainer.className = "grid-3x3";
+                gridStageBadge.innerText = "第1予選 (3×3 9択)";
+                gridStageBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-bold bg-neonBlue/20 text-neonBlue border border-neonBlue/40";
+            } else {
+                // 2x2 グリッドコンテナ作成
+                gridContainer.className = "grid-2x2";
+                gridStageBadge.innerText = "第2予選 (2×2 4択)";
+                gridStageBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-bold bg-neonPink/20 text-neonPink border border-neonPink/40";
+            }
+
+            gridStageTitle.innerText = `グループ ${currentGroupIdx + 1} / 7 (好きな${targetSelectCount}曲を選択)`;
+            updateGridSubmitBtn();
+
+            currentGroup.forEach(song => {
+                const card = document.createElement('div');
+                card.id = `grid-card-${song.id}`;
+                card.onclick = () => toggleGridSelection(song);
+                card.className = "jacket-card glass-panel cursor-pointer p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center text-center space-y-1 group relative overflow-hidden";
+                card.innerHTML = `
+                    <div class="w-full aspect-square rounded-lg overflow-hidden relative bg-slate-950 flex items-center justify-center border border-white/10">
+                        <svg class="w-full h-full" viewBox="0 0 200 200">${createJacketSVG(song)}</svg>
+                        <div class="check-mark absolute inset-0 bg-gold/30 backdrop-blur-[2px] hidden flex items-center justify-center text-gold text-lg sm:text-2xl font-black">
+                            <i class="fa-solid fa-circle-check drop-shadow-md"></i>
+                        </div>
+                    </div>
+                    <div class="w-full min-h-[2.1rem] flex flex-col justify-center px-0.5">
+                        <h4 class="text-[10px] sm:text-xs font-bold text-white group-hover:text-gold transition-colors line-clamp-2 leading-tight">${song.title}</h4>
+                    </div>
+                `;
+                gridContainer.appendChild(card);
+            });
+        }
+
+        function toggleGridSelection(song) {
+            const limit = (stage === 1) ? 4 : 2;
+            const idx = selectedInGroup.findIndex(s => s.id === song.id);
+            const card = document.getElementById(`grid-card-${song.id}`);
+            const check = card.querySelector('.check-mark');
+
+            if (idx >= 0) {
+                selectedInGroup.splice(idx, 1);
+                card.classList.remove('selected');
+                check.classList.add('hidden');
+            } else {
+                if (selectedInGroup.length >= limit) return;
+                selectedInGroup.push(song);
+                card.classList.add('selected');
+                check.classList.remove('hidden');
+            }
+            updateGridSubmitBtn();
+        }
+
+        function updateGridSubmitBtn() {
+            const limit = (stage === 1) ? 4 : 2;
+            gridSubmitText.innerText = `選んだ曲で確定する (${selectedInGroup.length}/${limit})`;
+            btnGridSubmit.disabled = (selectedInGroup.length !== limit);
+        }
+
+        function submitGridSelection() {
+            if (stage === 1) {
+                stage1Passed.push(...selectedInGroup);
+                currentGroupIdx++;
+                if (currentGroupIdx < 7) {
+                    renderGridGroup();
+                } else {
+                    startStage2();
+                }
+            } else if (stage === 2) {
+                final14Songs.push(...selectedInGroup);
+                currentGroupIdx++;
+                if (currentGroupIdx < 7) {
+                    renderGridGroup();
+                } else {
+                    startSorterMain();
+                }
+            }
+        }
+
+        // ================= 第2予選（2x2 4択） =================
+        function startStage2() {
+            stage = 2;
+            const shuffled2 = shuffle(stage1Passed); // 28曲
+            stage2Groups = [];
+            for (let i = 0; i < 7; i++) {
+                stage2Groups.push(shuffled2.slice(i * 4, (i + 1) * 4));
+            }
+            final14Songs = [];
+            currentGroupIdx = 0;
+            renderGridGroup();
+        }
+
+        // ================= 本戦（2択） =================
+        function startSorterMain() {
+            stage = 3;
+            screenGridStage.classList.add('hidden');
+            screenSorter.classList.remove('hidden');
+
+            unsortedItems = shuffle(final14Songs); // 14曲
+            sortedArray = [unsortedItems[0]];
+            currentItemIndex = 1;
+            comparisonCount = 0;
+            historyStack = [];
+
+            setupNextInsertion();
+        }
+
+        function setupNextInsertion() {
+            if (currentItemIndex >= unsortedItems.length) {
+                renderFinalResults();
+                return;
+            }
+            low = 0;
+            high = sortedArray.length - 1;
+            askComparison();
+        }
+
+        function askComparison() {
+            if (low > high) {
+                sortedArray.splice(low, 0, unsortedItems[currentItemIndex]);
+                currentItemIndex++;
+                setupNextInsertion();
+                return;
+            }
+
+            mid = Math.floor((low + high) / 2);
+
+            const targetSong = unsortedItems[currentItemIndex];
+            const compareSong = sortedArray[mid];
+
+            document.getElementById('song-a-title').innerText = targetSong.title;
+            document.getElementById('song-a-release').innerText = `${targetSong.release}年`;
+            document.getElementById('song-a-detail').innerText = targetSong.single;
+            document.getElementById('song-a-svg').innerHTML = createJacketSVG(targetSong);
+
+            document.getElementById('song-b-title').innerText = compareSong.title;
+            document.getElementById('song-b-release').innerText = `${compareSong.release}年`;
+            document.getElementById('song-b-detail').innerText = compareSong.single;
+            document.getElementById('song-b-svg').innerHTML = createJacketSVG(compareSong);
+
+            comparisonCount++;
+            document.getElementById('battle-count').innerHTML = `<i class="fa-solid fa-gamepad mr-1"></i> 本戦 BATTLE #${comparisonCount}`;
+
+            let progress = Math.min(Math.round((currentItemIndex / unsortedItems.length) * 100), 98);
+            document.getElementById('progress-text').innerText = `${progress}%`;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+
+            document.getElementById('btn-undo').disabled = historyStack.length === 0;
+        }
+
+        function handleChoice(val) {
+            historyStack.push({
+                unsortedItems: [...unsortedItems],
+                sortedArray: [...sortedArray],
+                currentItemIndex: currentItemIndex,
+                low: low,
+                high: high,
+                mid: mid,
+                comparisonCount: comparisonCount
+            });
+
+            if (val === 1) high = mid - 1;
+            else if (val === -1) low = mid + 1;
+            else low = mid + 1;
+
+            askComparison();
+        }
+
+        function undoChoice() {
+            if (historyStack.length === 0) return;
+            const prev = historyStack.pop();
+            unsortedItems = prev.unsortedItems;
+            sortedArray = prev.sortedArray;
+            currentItemIndex = prev.currentItemIndex;
+            low = prev.low;
+            high = prev.high;
+            mid = prev.mid;
+            comparisonCount = prev.comparisonCount - 1;
+
+            askComparison();
+            showToast("ひとつ前の選択に戻りました");
+        }
+
+        function openInterimRanking() {
+            const listEl = document.getElementById('interim-list');
+            listEl.innerHTML = '';
+            const temp = [...sortedArray, ...unsortedItems.slice(currentItemIndex)];
+
+            temp.forEach((song, idx) => {
+                const item = document.createElement('div');
+                item.className = "p-2 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between text-xs";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5 truncate">
+                        <span class="w-4 text-center font-mono font-bold ${idx < 3 ? 'text-gold' : 'text-slate-400'}">${idx + 1}</span>
+                        <span class="font-bold text-white truncate">${song.title}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 shrink-0">${song.release}年</span>
+                `;
+                listEl.appendChild(item);
+            });
+
+            document.getElementById('modal-interim').classList.remove('hidden');
+        }
+
+        function closeInterimRanking() {
+            document.getElementById('modal-interim').classList.add('hidden');
+        }
+
+        // ================= モーダル: 全63曲一覧 =================
+        function openSongListModal() {
+            const container = document.getElementById('all-song-list-container');
+            container.innerHTML = '';
+            
+            SONGS_DATA.forEach(song => {
+                const row = document.createElement('div');
+                row.className = "p-2 rounded-xl glass-panel border border-white/10 flex items-center justify-between gap-2.5";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center font-mono text-[10px] text-gold font-bold shrink-0">
+                            ${song.id}
+                        </div>
+                        <div class="truncate">
+                            <h5 class="font-bold text-white text-xs truncate">${song.title}</h5>
+                            <p class="text-[9px] text-slate-400 truncate">${song.single}</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300 shrink-0 border border-white/10">${song.release}年</span>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('modal-song-list').classList.remove('hidden');
+        }
+
+        function closeSongListModal() {
+            document.getElementById('modal-song-list').classList.add('hidden');
+        }
+
+        // ================= 結果発表 =================
+        function renderFinalResults() {
+            stage = 4;
+            screenSorter.classList.add('hidden');
+            screenResult.classList.remove('hidden');
+
+            const resultListEl = document.getElementById('result-list');
+            resultListEl.innerHTML = '';
+
+            const top10 = sortedArray.slice(0, 10);
+            top10.forEach((song, idx) => {
+                const rank = idx + 1;
+                let badgeStyle = "bg-slate-800 text-slate-300 border-white/10";
+                let icon = "";
+
+                if (rank === 1) { badgeStyle = "rank-1 shadow-lg"; icon = '<i class="fa-solid fa-crown mr-1"></i>'; }
+                else if (rank === 2) { badgeStyle = "rank-2 shadow"; icon = '<i class="fa-solid fa-crown mr-1"></i>'; }
+                else if (rank === 3) { badgeStyle = "rank-3 shadow"; icon = '<i class="fa-solid fa-crown mr-1"></i>'; }
+
+                const item = document.createElement('div');
+                item.className = "glass-panel p-2.5 rounded-xl border border-white/10 flex items-center justify-between gap-3 hover:border-gold/50 transition-all";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-7 h-7 rounded-lg ${badgeStyle} flex items-center justify-center font-display text-xs shrink-0">
+                            ${icon}${rank}
+                        </div>
+                        <div class="truncate">
+                            <h4 class="font-bold text-white text-xs sm:text-sm truncate">${song.title}</h4>
+                            <p class="text-[10px] text-slate-400">${song.release}年 / ${song.single}</p>
+                        </div>
+                    </div>
+                `;
+                resultListEl.appendChild(item);
+            });
+        }
+
+        function copyResultText(limit) {
+            const targetList = sortedArray.slice(0, limit);
+            const textList = targetList.map((song, i) => `${i + 1}位: ${song.title}`).join('\n');
+            const shareText = `【私のSMAPシングル曲 マイベストTOP10】\n${textList}\n\n#SMAP #SMAPシングルソーター`;
+
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = shareText;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            showToast("TOP10をクリップボードにコピーしました！");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        function resetSorter() {
+            stage = 0;
+            screenGridStage.classList.add('hidden');
+            screenSorter.classList.add('hidden');
+            screenResult.classList.add('hidden');
+            btnHeaderReset.classList.add('hidden');
+            screenStart.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
